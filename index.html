@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas // A Manifesto</title>
+    <link rel="stylesheet" href="https://unpkg.com/@sakun/system.css" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            margin: 0;
+            padding: 0;
+            font-family: 'Chicago', 'ChicagoFLF', monospace;
+            overflow-x: hidden;
+        }
+
+        /* ============================================
+           BOOT SEQUENCE STYLES
+           ============================================ */
+
+        .boot-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .boot-screen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .boot-screen.hidden {
+            display: none;
+        }
+
+        .boot-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+            animation-delay: 0.5s;
+        }
+
+        /* Pixel art "A" for Atlas in retro Mac style */
+        .boot-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .boot-text {
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+            animation-delay: 1s;
+        }
+
+        .progress-container {
+            width: 300px;
+            height: 20px;
+            border: 2px solid #fff;
+            background: #000;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+            animation-delay: 1.5s;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #fff;
+            animation: loadProgress 2s ease forwards;
+            animation-delay: 1.8s;
+        }
+
+        .loading-text {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+            animation-delay: 1.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes loadProgress {
+            0% {
+                width: 0%;
+            }
+
+            20% {
+                width: 15%;
+            }
+
+            40% {
+                width: 35%;
+            }
+
+            60% {
+                width: 60%;
+            }
+
+            80% {
+                width: 85%;
+            }
+
+            100% {
+                width: 100%;
+            }
+        }
+
+        /* ============================================
+           MAIN CONTENT STYLES
+           ============================================ */
+
+        .main-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .main-content.visible {
+            display: flex;
+            justify-content: center;
+            opacity: 1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+        }
+
+        .window {
+            box-shadow: 12px 12px 0px #000;
+            margin-bottom: 40px;
+        }
+
+        .window-pane {
+            padding: 30px;
+            max-height: none;
+            overflow: visible;
+        }
+
+        /* ============================================
+           MANIFESTO TYPOGRAPHY
+           ============================================ */
+
+        .manifesto-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 3px solid #000;
+        }
+
+        .manifesto-header h1 {
+            font-size: 3.5rem;
+            margin: 0 0 5px 0;
+            letter-spacing: 0.3em;
+        }
+
+        .manifesto-header .tagline {
+            font-size: 1.1rem;
+            font-style: italic;
+            color: #555;
+        }
+
+        .manifesto-section {
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 2px dotted #000;
+        }
+
+        .manifesto-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .section-number {
+            font-size: 0.9rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 5px;
+        }
+
+        .manifesto-section h2 {
+            font-size: 1.6rem;
+            margin: 0 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .manifesto-section p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 15px;
+        }
+
+        .manifesto-section ul {
+            list-style-type: square;
+            padding-left: 25px;
+            margin: 15px 0;
+        }
+
+        .manifesto-section li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        /* Inverted highlight boxes */
+        .insight-box {
+            background: #000;
+            color: #fff;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border: none;
+        }
+
+        .insight-box strong {
+            display: block;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Crime callouts */
+        .crime-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .crime-list li {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border: 2px solid #000;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .crime-list li::before {
+            content: "×";
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-right: 15px;
+            color: #000;
+        }
+
+        /* Quote styling */
+        .quote {
+            font-size: 1.3rem;
+            font-style: italic;
+            text-align: center;
+            padding: 30px;
+            margin: 30px 0;
+            border-top: 2px solid #000;
+            border-bottom: 2px solid #000;
+        }
+
+        /* Call to action */
+        .cta-section {
+            text-align: center;
+            padding-top: 20px;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .btn.primary {
+            font-size: 1.1rem;
+            padding: 12px 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Footer */
+        .manifesto-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* Links */
+        a {
+            color: #000;
+            text-decoration: underline;
+        }
+
+        a:hover {
+            background: #000;
+            color: #fff;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .manifesto-header h1 {
+                font-size: 2.5rem;
+                letter-spacing: 0.15em;
+            }
+
+            .window-pane {
+                padding: 20px;
+            }
+
+            .manifesto-section h2 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ============================================
+         BOOT SEQUENCE
+         ============================================ -->
+    <div class="boot-screen" id="bootScreen">
+        <!-- Pixel Art Atlas Icon -->
+        <div class="boot-icon">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Simple pixelated "A" shape representing Atlas -->
+                <rect x="14" y="4" width="4" height="4" fill="white" />
+                <rect x="10" y="8" width="4" height="4" fill="white" />
+                <rect x="18" y="8" width="4" height="4" fill="white" />
+                <rect x="6" y="12" width="4" height="4" fill="white" />
+                <rect x="22" y="12" width="4" height="4" fill="white" />
+                <rect x="6" y="16" width="4" height="4" fill="white" />
+                <rect x="10" y="16" width="4" height="4" fill="white" />
+                <rect x="14" y="16" width="4" height="4" fill="white" />
+                <rect x="18" y="16" width="4" height="4" fill="white" />
+                <rect x="22" y="16" width="4" height="4" fill="white" />
+                <rect x="6" y="20" width="4" height="4" fill="white" />
+                <rect x="22" y="20" width="4" height="4" fill="white" />
+                <rect x="6" y="24" width="4" height="4" fill="white" />
+                <rect x="22" y="24" width="4" height="4" fill="white" />
+            </svg>
+        </div>
+        <div class="boot-text">Welcome to Atlas</div>
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="loading-text">Initializing system...</div>
+    </div>
+
+    <!-- ============================================
+         MAIN MANIFESTO CONTENT
+         ============================================ -->
+    <div class="main-content" id="mainContent">
+        <div class="container">
+
+            <div class="window">
+                <div class="title-bar">
+                    <button aria-label="Close" class="close"></button>
+                    <h1 class="title">Atlas_Manifesto.txt</h1>
+                    <button aria-label="Resize" class="resize"></button>
+                </div>
+
+                <div class="window-pane">
+
+                    <!-- Header -->
+                    <div class="manifesto-header">
+                        <h1>ATLAS</h1>
+                        <p class="tagline">Infrastructure for the Sovereign Creator</p>
+                    </div>
+
+                    <!-- ACT I: THE CRIMES -->
+                    <div class="manifesto-section">
+                        <p class="section-number">Act I</p>
+                        <h2>The Crimes of the Corporate Class</h2>
+
+                        <p>For a century, the corporate class built infrastructure for employees. They built it for
+                            people who fit their boxes. The rest were left behind.</p>
+
+                        <ul class="crime-list">
+                            <li>
+                                <div><strong>The Resume</strong><br>They reduced human potential to job titles and
+                                    tenure. Creative work—portfolios, projects, impact—was rendered invisible.</div>
+                            </li>
+                            <li>
+                                <div><strong>The Banks</strong><br>They punished irregular income. They denied mortgages
+                                    to six-figure creators because their revenue didn't arrive in bi-weekly paychecks.
+                                </div>
+                            </li>
+                            <li>
+                                <div><strong>The Platforms</strong><br>They built attention machines, not creative
+                                    infrastructure. They made creators dependent, then changed the algorithm.</div>
+                            </li>
+                            <li>
+                                <div><strong>"Professionalism"</strong><br>They demanded conformity. They sanitized
+                                    personality. They made authenticity a career risk.</div>
+                            </li>
+                        </ul>
+
+                        <div class="insight-box">
+                            <strong>The Result:</strong>
+                            50 million creators worldwide operate on infrastructure that actively works against them.
+                            They are second-class citizens in the economy they are building.
+                        </div>
+                    </div>
+
+                    <!-- ACT II: THE RECKONING -->
+                    <div class="manifesto-section">
+                        <p class="section-number">Act II</p>
+                        <h2>The Reckoning</h2>
+
+                        <p>The world the corporate class built is ending. Three forces are converging:</p>
+
+                        <ul>
+                            <li><strong>The Creator Economy</strong> — $250 billion today. $1 trillion by 2030. This is
+                                not a trend; it is a structural shift in how humans work.</li>
+                            <li><strong>AI Displacement</strong> — Millions will be pushed out of traditional
+                                employment. They will need to become "companies of one." They will need infrastructure.
+                            </li>
+                            <li><strong>Generational Revolt</strong> — Young people are refusing the corporate ladder.
+                                They want autonomy, ownership, and authenticity. They will not beg for permission.</li>
+                        </ul>
+
+                        <p class="quote">"The old infrastructure cannot serve the new workforce. It was never designed
+                            to."</p>
+
+                        <p>The question is not whether creator infrastructure will be built. The question is:
+                            <strong>who will build it?</strong>
+                        </p>
+                    </div>
+
+                    <!-- ACT III: THE SOLUTION -->
+                    <div class="manifesto-section">
+                        <p class="section-number">Act III</p>
+                        <h2>Atlas</h2>
+
+                        <p>Atlas is not a tool. It is not a platform. It is <strong>infrastructure</strong>—the
+                            operating system for the sovereign creator.</p>
+
+                        <p>Three layers. One integrated system:</p>
+
+                        <ul>
+                            <li><strong>Layer I: Identity</strong> — The Impact Portfolio. Your work is your resume.
+                                Show, don't tell. A living, dynamic representation of what you create and the impact it
+                                makes.</li>
+                            <li><strong>Layer II: Workflow</strong> — Creator-native project management, collaboration,
+                                and communication. Designed for how creative work actually happens.</li>
+                            <li><strong>Layer III: Fintech</strong> — Get paid in 24 hours, not 90 days. Access credit
+                                designed for creator income patterns. Be treated like a real business—because you are
+                                one.</li>
+                        </ul>
+
+                        <div class="insight-box">
+                            <strong>The Wedge:</strong>
+                            We begin with Identity. The Impact Portfolio launches first. Once we own how creators
+                            present themselves professionally, everything else follows.
+                        </div>
+                    </div>
+
+                    <!-- ACT IV: THE CALL -->
+                    <div class="manifesto-section">
+                        <p class="section-number">Act IV</p>
+                        <h2>The Call</h2>
+
+                        <p>The corporate class had their century.</p>
+                        <p>This one belongs to us.</p>
+
+                        <p>To the designers, developers, writers, and strategists building the future from their
+                            laptops—you deserve infrastructure that respects what you do. You deserve to be treated as
+                            the legitimate businesses you are. You deserve to own your identity, not rent it from
+                            platforms that exploit you.</p>
+
+                        <p><strong>Atlas is that infrastructure.</strong></p>
+
+                        <div class="cta-section">
+                            <p>The system is ready. Are you?</p>
+                            <a href="mailto:fawaz.a.ishola@gmail.com?subject=Atlas%20Protocol%20//%20Inquiry&body=I%20read%20the%20manifesto.%20Let's%20talk."
+                                style="text-decoration: none;">
+                                <button class="btn primary" style="cursor: pointer;">Join the Movement →</button>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="manifesto-footer">
+                        <div>Atlas Systems // 2025</div>
+                        <div>v1.0.0</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============================================
+         BOOT SEQUENCE SCRIPT
+         ============================================ -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const bootScreen = document.getElementById('bootScreen');
+            const mainContent = document.getElementById('mainContent');
+
+            // Total boot animation time: ~4 seconds
+            // 0.5s icon fade + 0.5s text + 2s progress bar + 0.5s buffer
+            setTimeout(function () {
+                bootScreen.classList.add('fade-out');
+
+                setTimeout(function () {
+                    bootScreen.classList.add('hidden');
+                    mainContent.classList.add('visible');
+                }, 500);
+            }, 4000);
+        });
+    </script>
+
+</body>
+
+</html>
